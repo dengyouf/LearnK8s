@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-phone
+  namespace: learn-ingress
+spec:
+  selector:
+    matchLabels:
+      app: nginx-phone
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: nginx-phone
+    spec:
+      containers:
+      - name: nginx-phone
+        image: registry.cn-beijing.aliyuncs.com/dengyou/learnk8s:nginx-phone
+        imagePullPolicy: IfNotPresent
+      restartPolicy: Always

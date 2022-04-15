@@ -1,0 +1,46 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: phone-ingress
+  namespace: learn-ingress
+spec:
+  rules:
+  - host: phone.linux.io
+    http:
+      paths:
+      - backend:
+          service:
+            name: nginx-phone-svc
+            port:
+              number: 80
+        path: /
+        pathType: ImplementationSpecific
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/server-snippet: |
+      set $agentflag 0;
+              if ($http_user_agent ~* "(Android|iPhone|Phone|UC|Kindle)" ){
+                 set $agentflag 1;
+              }
+              if ( $agentflag = 1 ) {
+                 return 301 http://phone.linux.io;
+              }
+  name: pc-ingress
+  namespace: learn-ingress
+spec:
+  rules:
+  - host: linux.io
+    http:
+      paths:
+      - backend:
+          service:
+            name: nginx-pc-svc
+            port:
+              number: 80
+        path: /
+        pathType: ImplementationSpecific

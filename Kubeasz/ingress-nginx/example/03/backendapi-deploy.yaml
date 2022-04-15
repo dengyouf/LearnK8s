@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backendapi
+  namespace: learn-ingress
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backendapi
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: backendapi
+    spec:
+      containers:
+      - name: backendapi
+        image: registry.cn-beijing.aliyuncs.com/dengyou/learnk8s:nginx-backend-api
+        imagePullPolicy: IfNotPresent
+      restartPolicy: Always
