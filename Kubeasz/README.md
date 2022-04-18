@@ -136,19 +136,83 @@
    kubectl  get pod -o wide -w
   NAME                    READY   STATUS              RESTARTS   AGE   IP               NODE            NOMINATED NODE   READINESS GATES
   myapp-7d4b7b84b-6g8xm   1/1     Running             0          13s   192.168.85.196   172.20.47.203   <none>           <none>
-  myapp-7d4b7b84b-pjg7p   1/1     Running             0          13s   192.168.32.131   172.20.47.4     <none>           <none>
+  myapp-7d4b7b84b-9zxht   1/1     Running             0          13s   192.168.32.131   172.20.47.4     <none>           <none>
   myapp-7d4b7b84b-t86sm   1/1     Running             0          60s   192.168.58.193   172.20.47.204   <none>           <none>
   ```
 
-- [安装集群主要插](https://github.com/easzlab/kubeasz/blob/master/docs/setup/07-install_cluster_addon.md) ：`./ezctl setup k8s-01 07 |tee install-log/07.log`
+- [安装集群主要插](https://github.com/easzlab/kubeasz/blob/master/docs/setup/07-install_cluster_addon.md) 
+
   - coredns
-  - metrics-server
-  - dashboard
-  
   ```bash
-   kubectl  expose deployment/myapp  --port=80 --target-port=80
-   kubectl  exec -it myapp-7d4b7b84b-6g8xm -- sh
-   / # wget -q myapp
-   / # wget -q -O  - myapp
-   Hello MyApp | Version: v1 | <a href="hostname.html">Pod Name</a>
+  ~]# kubectl  exec -it myapp-7d4b7b84b-9zxht -- sh
+  / # cat /etc/resolv.conf 
+  nameserver 10.68.0.2
+  search default.svc.cluster.local. svc.cluster.local. cluster.local.
+  options ndots:5
   ```
+  ```
+  ~]wget https://raw.githubusercontent.com/kubernetes/kubernetes/release-1.20/cluster/addons/dns/coredns/coredns.yaml.base
+  ~]# diff coredns.yaml.base coredns.yaml.base.bak_orig 
+  70c70
+  <         kubernetes cluster.local in-addr.arpa ip6.arpa {
+  ---
+  >         kubernetes __DNS__DOMAIN__ in-addr.arpa ip6.arpa {
+  135c135
+  <         image: registry.cn-beijing.aliyuncs.com/dengyou/coredns:1.7.0
+  ---
+  >         image: k8s.gcr.io/coredns:1.7.0
+  139c139
+  <             memory: 256Mi
+  ---
+  >             memory: __DNS__MEMORY__LIMIT__
+  205c205
+  <   clusterIP: 10.68.0.2
+  ---
+  >   clusterIP: __DNS__SERVER__
+  ~]# kubectl  apply -f  coredns.yaml.base
+  ```
+  ```
+  ~]# kubectl  exec -it myapp-7d4b7b84b-9zxht -- nslookup kubernetes
+  nslookup: can't resolve '(null)': Name does not resolve
+  Name:      kubernetes
+  Address 1: 10.68.0.1 kubernetes.default.svc.cluster.local
+  ```
+
+  - dashboard
+  ```
+  ~]# wgethttps://raw.githubusercontent.com/kubernetes/kubernetes/release-1.20/cluster/addons/dashboard/dashboard.yaml
+  ~]# diff dashboard.yaml dashboard.yaml.bak_orig 
+  32d31
+  <   type: NodePort
+  36d34
+  <       nodePort: 30001
+  kubectl  apply -f dashboard.yaml
+  ```
+  ```
+  ~]# vim admin-user.yaml
+  ---
+  apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: admin-user
+    namespace: kubernetes-dashboard
+  ---
+  apiVersion: rbac.authorization.k8s.io/v1
+  kind: ClusterRoleBinding
+  metadata:
+    name: admin-user
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: cluster-admin
+  subjects:
+  - kind: ServiceAccount
+    name: admin-user
+    namespace: kubernetes-dashboard
+  ```
+  ```
+  ~]# kubectl -n kubernetes-dashboard get secret $(kubectl -n kubernetes-dashboard get sa/admin-user -o jsonpath="{.secrets[0].name}") -o go-template="{{.data.token | base64decode}}"
+  ```
+
+  - metrics-server
+  
