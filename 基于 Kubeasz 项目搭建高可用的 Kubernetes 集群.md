@@ -477,8 +477,12 @@ NAME            CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%
 ```
 
 **6.3 部署 dashboard**
+**6.3 部署 dashboard**
 ```bash
-
+wget https://raw.githubusercontent.com/kubernetes/dashboard/v2.3.1/aio/deploy/recommended.yaml
+kubectl  apply -f recommended.yaml 
+kubectl apply -f admin-user.yaml
+kubectl -n kubernetes-dashboard get secret $(kubectl -n kubernetes-dashboard get sa/admin-user -o jsonpath="{.secrets[0].name}") -o go-template="{{.data.token | base64decode}}"
 ```
 
   
