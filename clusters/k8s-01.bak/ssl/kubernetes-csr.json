@@ -1,0 +1,35 @@
+{
+  "CN": "kubernetes",
+  "hosts": [
+    "127.0.0.1",
+    "192.168.23.11",
+    "192.168.23.12",
+    "10.68.0.1",
+    "192.168.23.11",
+    "192.168.23.12",
+    "192.168.23.13",
+    "192.168.23.14",
+    "192.168.23.15",
+    "192.168.23.16",
+    "192.168.23.17",
+    "k8s.test.io",
+    "kubernetes",
+    "kubernetes.default",
+    "kubernetes.default.svc",
+    "kubernetes.default.svc.cluster",
+    "kubernetes.default.svc.cluster.local"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "CN",
+      "ST": "HangZhou",
+      "L": "XS",
+      "O": "k8s",
+      "OU": "System"
+    }
+  ]
+}
