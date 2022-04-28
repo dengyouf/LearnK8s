@@ -1,0 +1,22 @@
+[Unit]
+Description=Kubernetes Kubelet
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+[Service]
+WorkingDirectory=/var/lib/kubelet
+ExecStart=/usr/local/bin/kubelet \
+  --config=/var/lib/kubelet/config.yaml \
+  --cni-bin-dir=/usr/local/bin \
+  --cni-conf-dir=/etc/cni/net.d \
+  --hostname-override=192.168.23.11 \
+  --image-pull-progress-deadline=5m \
+  --kubeconfig=/etc/kubernetes/kubelet.kubeconfig \
+  --network-plugin=cni \
+  --pod-infra-container-image=easzlab/pause-amd64:3.5 \
+  --root-dir=/var/lib/kubelet \
+  --v=2
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
